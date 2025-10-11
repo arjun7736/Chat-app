@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { ENV } from "./env.js";
 
 export const generateToken = (userId, res) => {
-  if (!Env.JWT_SECRET) {
+  if (!ENV.JWT_SECRET) {
     throw new Error("No JWT Secret");
   }
   const token = jwt.sign({ userId }, ENV.JWT_SECRET, {
