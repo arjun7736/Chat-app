@@ -1,6 +1,7 @@
 import { generateToken } from "../lib/utils.js";
 import UserDB from "../models/User.js";
 import bcrypt from "bcrypt";
+import cloudinary from "../lib/cloudinary.js";
 
 export const signup = async (req, res) => {
   const { name, email, password } = req.body;
@@ -52,11 +53,11 @@ export const signup = async (req, res) => {
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
-  if(!email  || !password){
-    return res.status(400).json({message:"Fill all field"})
+  if (!email || !password) {
+    return res.status(400).json({ message: "Fill all field" });
   }
   try {
-    const user =await UserDB.findOne({ email });
+    const user = await UserDB.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: "invalied credentials" });
     }
@@ -75,7 +76,7 @@ export const login = async (req, res) => {
       profilePic: user.profilePic,
     });
   } catch (error) {
-    console.error("error",error)
+    console.error("error", error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -83,4 +84,27 @@ export const login = async (req, res) => {
 export const logout = (_, res) => {
   res.cookie("jwt", "", { maxAge: 0 });
   res.status(200).json({ message: "Logout" });
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const profilePic = req.body;
+    if (!profilePic) {
+      return res.status(400).json({ message: "Profile pic Required" });
+    }
+    const userId = req.user._id;
+
+    const upRes = await cloudinary.uploader.upload(profilePic);
+
+    const updated = await UserDB.findByIdAndUpdate(
+      userId,
+      { profilePic: upRes.secure_url },
+      { new: true }
+    );
+
+    res.status(200).json(updated);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };
