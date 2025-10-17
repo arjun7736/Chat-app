@@ -1,4 +1,5 @@
 import React from 'react'
+import { MessageCircleIcon } from "lucide-react";
 
 const NoConversationPlaceholder = () => {
   return (
