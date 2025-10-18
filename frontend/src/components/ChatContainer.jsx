@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/useAuthStore'
 import ChatHeader from './ChatHeader'
 import MessageInput from './MessageInput'
 import MessagesLoadingSkeleton from './MessagesLoadingSkeleton'
+import NoChatHistoryPlaceholder from './NoChatHistoryPlaceholder'
 
 const ChatContainer = () => {
 
@@ -20,8 +21,6 @@ const ChatContainer = () => {
       messageEndRef.current.scrollIntoView({behavior:"smooth"})
     }
   },[messages])
-
-  
   return (
     <>
       <ChatHeader />
@@ -31,11 +30,11 @@ const ChatContainer = () => {
             {messages.map((msg) => (
               <div
                 key={msg._id}
-                className={`chat ${msg.senderId === authUser._id ? "chat-end" : "chat-start"}`}
+                className={`chat ${msg.senderId == authUser._id ? "chat-end" : "chat-start"}`}
               >
                 <div
                   className={`chat-bubble relative ${
-                    msg.senderId === authUser._id
+                    msg.senderId == authUser._id
                       ? "bg-cyan-600 text-white"
                       : "bg-slate-800 text-slate-200"
                   }`}
@@ -58,7 +57,7 @@ const ChatContainer = () => {
         ) : isMessagesLoading ? (
           <MessagesLoadingSkeleton />
         ) : (
-          <NoChatHistoryPlaceholder name={selectedUser.fullName} />
+          <NoChatHistoryPlaceholder name={selectedUser.name} />
         )}
       </div>
 

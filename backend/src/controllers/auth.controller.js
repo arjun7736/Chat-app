@@ -88,7 +88,7 @@ export const logout = (_, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-    const profilePic = req.body;
+    const {profilePic} = req.body;
     if (!profilePic) {
       return res.status(400).json({ message: "Profile pic Required" });
     }

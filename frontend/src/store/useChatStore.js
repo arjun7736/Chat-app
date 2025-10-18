@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { useAuthStore } from "./useAuthStore";
 
 export const useChatStore = create((set, get) => ({
-  allContracts: [],
+  allContacts: [],
   chats: [],
   messages: [],
   activeTab: "chats",
@@ -19,7 +19,7 @@ export const useChatStore = create((set, get) => ({
     set({ isUsersLoading: true });
     try {
       const res = await axiosInstance.get("/message/contracts");
-      set({ allContracts: res.data });
+      set({ allContacts: res.data });
     } catch (error) {
       toast.error(error.response.data.message);
     } finally {
@@ -30,7 +30,7 @@ export const useChatStore = create((set, get) => ({
   getMyChatPartners: async () => {
     set({ isUsersLoading: true });
     try {
-      const res = await axiosInstance.get("/message/chats");
+      const res = await axiosInstance.get("/message/chats");   
       set({ chats: res.data });
     } catch (error) {
       toast.error(error.response.data.message);
@@ -42,10 +42,10 @@ export const useChatStore = create((set, get) => ({
   getMessagesByUserId: async (userId) => {
     set({ isMessagesLoading: true });
     try {
-      const res = await axiosInstance.get(`/messages/${userId}`);
+      const res = await axiosInstance.get(`/message/${userId}`);
       set({ messages: res.data });
     } catch (error) {
-      toast.error(error.response.data.message || "error.message");
+      toast.error(error.response.data.message || "Unexpected error Occured");
     } finally {
       set({ isMessagesLoading: false });
     }
@@ -63,13 +63,13 @@ export const useChatStore = create((set, get) => ({
         recieverId:selectedUser._id,
         text:messageData.text,
         image:messageData.image,
-        createdAt:new Date.now().toISOString()
+        createdAt: new Date().toISOString()
     }
 
     set({messages:[...messages,optimisticMessage]})
     try {
-      const res = axiosInstance.post(
-        `/messages/send/${selectedUser._id}`,
+      const res = await axiosInstance.post(
+        `/message/send/${selectedUser._id}`,
         messageData
       );
 
