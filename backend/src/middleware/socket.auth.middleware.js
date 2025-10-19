@@ -5,7 +5,7 @@ import { ENV } from "../lib/env.js";
 export const socketAuthMiddleware = async (socket, next) => {
   try {
     const token = socket.handshake.headers.cookie
-      ?.split(": ")
+      ?.split("; ")
       .find((row) => row.startsWith("jwt="))
       ?.split("=")[1];
 
@@ -30,7 +30,6 @@ export const socketAuthMiddleware = async (socket, next) => {
 
     socket.user = user;
     socket.userId = user._id.toString();
-
     next();
   } catch (error) {
     console.log("Unexpected Error");

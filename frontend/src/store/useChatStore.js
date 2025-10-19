@@ -30,7 +30,7 @@ export const useChatStore = create((set, get) => ({
   getMyChatPartners: async () => {
     set({ isUsersLoading: true });
     try {
-      const res = await axiosInstance.get("/message/chats");   
+      const res = await axiosInstance.get("/message/chats");
       set({ chats: res.data });
     } catch (error) {
       toast.error(error.response.data.message);
@@ -54,19 +54,19 @@ export const useChatStore = create((set, get) => ({
   sendMessage: async (messageData) => {
     const { selectedUser, messages } = get();
 
-    const{authUser}=useAuthStore.getState()
-    const tempId =`temp-${Date.now()}`
+    const { authUser } = useAuthStore.getState();
+    const tempId = `temp-${Date.now()}`;
 
-    const optimisticMessage={
-        _id:tempId,
-        senderId:authUser._id,
-        recieverId:selectedUser._id,
-        text:messageData.text,
-        image:messageData.image,
-        createdAt: new Date().toISOString()
-    }
+    const optimisticMessage = {
+      _id: tempId,
+      senderId: authUser._id,
+      recieverId: selectedUser._id,
+      text: messageData.text,
+      image: messageData.image,
+      createdAt: new Date().toISOString(),
+    };
 
-    set({messages:[...messages,optimisticMessage]})
+    set({ messages: [...messages, optimisticMessage] });
     try {
       const res = await axiosInstance.post(
         `/message/send/${selectedUser._id}`,
@@ -75,8 +75,28 @@ export const useChatStore = create((set, get) => ({
 
       set({ messages: messages.concat(res.data) });
     } catch (error) {
-        set({messages:messages})
+      set({ messages: messages });
       toast.error(error.response.data.message || "sopmething went Wrong");
     }
+  },
+
+  subscribeToMessage: () => {
+    const { selectedUser } = get();
+    if (!selectedUser) return;
+    const socket = useAuthStore.getState().socket;
+
+    socket.on("newMessage", (newMessage) => {
+
+     const  isMessageSentFromSelectedUser= newMessage.senderId ==selectedUser._id
+      if(!isMessageSentFromSelectedUser) return
+
+      const currentMessages = get().messages;
+      set({ messages: [...currentMessages, newMessage] });
+    });
+  },
+
+  unSubscribeFromMessages: () => {
+    const socket = useAuthStore.getState().socket;
+    socket.off("newMessage");
   },
 }));
