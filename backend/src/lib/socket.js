@@ -12,10 +12,16 @@ const io = new Server(server, {
   cors: {
     origin: ["http://localhost:5173"],
     credentials: true,
+    methods: ["GET", "POST"]
   },
 });
 
 io.use(socketAuthMiddleware);
+
+
+export const getRecieverSocketId=(userId)=>{
+  return userSocketMap[userId]
+}
 
 const userSocketMap = {};
 
@@ -25,7 +31,7 @@ io.on("connection", (socket) => {
 
   userSocketMap[userId] = socket.id;
 
-  io.emit("getOnlineUsers", Object.keys[userSocketMap]);
+  io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
   socket.on("disconnect", () => {
     console.log("user disconnectd", socket.user.name);

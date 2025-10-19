@@ -1,6 +1,7 @@
 import UserDB from "../models/User.js";
 import MessageDB from "../models/Message.js";
 import cloudinary from "../lib/cloudinary.js";
+import { getRecieverSocketId, io } from "../lib/socket.js";
 
 export const getAllContacts = async (req, res) => {
   try {
@@ -45,13 +46,16 @@ export const sendMessage = async (req, res) => {
       return res.status(400).json({ message: "Message required" });
     }
 
-    if(senderId.equals(recieverId)){
-        return res.status(400).json({message:" Cannot sent Message Yourself"})
+    if (senderId.equals(recieverId)) {
+      return res.status(400).json({ message: " Cannot sent Message Yourself" });
     }
-const recieverExists =await UserDB.exists({_id:recieverId})
-if(!recieverExists){
-    return res.status(404).json({message:"Reciever not Found"})
-}
+
+    const recieverExists = await UserDB.exists({ _id: recieverId });
+    
+    if (!recieverExists) {
+      return res.status(404).json({ message: "Reciever not Found" });
+    }
+
     let imageUrl;
 
     if (image) {
@@ -66,6 +70,12 @@ if(!recieverExists){
       image: imageUrl,
     });
     await newMessage.save();
+
+    const recieverSocketId = getRecieverSocketId(recieverId);
+
+    if (recieverId) {
+      io.to(recieverSocketId).emit("newMessage", newMessage);
+    }
 
     res.status(201).json(newMessage);
   } catch (error) {

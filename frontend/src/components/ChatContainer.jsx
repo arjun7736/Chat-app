@@ -8,19 +8,23 @@ import NoChatHistoryPlaceholder from './NoChatHistoryPlaceholder'
 
 const ChatContainer = () => {
 
-  const {selectedUser,getMessagesByUserId,messages,isMessagesLoading} =useChatStore()
+  const {selectedUser,getMessagesByUserId,messages,isMessagesLoading,subscribeToMessage,unSubscribeFromMessages} =useChatStore()
   const {authUser}=useAuthStore()
   const messageEndRef =useRef(null)
 
   useEffect(()=>{
     getMessagesByUserId(selectedUser._id)
-  },[selectedUser,getMessagesByUserId])
+    subscribeToMessage()
+
+    return()=> unSubscribeFromMessages()
+  },[selectedUser,getMessagesByUserId,unSubscribeFromMessages,subscribeToMessage])
 
   useEffect(()=>{
     if(messageEndRef.current){
       messageEndRef.current.scrollIntoView({behavior:"smooth"})
     }
   },[messages])
+  
   return (
     <>
       <ChatHeader />
